@@ -15,7 +15,8 @@ class Categoria extends Authenticatable
     protected $primaryKey='idcategoria';
     public $timestamps=false;
     protected $fillable=[
-        'descripcioncategoria'.
+        'descripcioncategoria',
+		'descrip',
         'estado'
     ];
     protected $guarded=[

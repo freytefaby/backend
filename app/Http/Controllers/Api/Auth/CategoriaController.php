@@ -15,8 +15,18 @@ class CategoriaController extends Controller
 
     public function index(Request $request)
         {
-            $categoria=DB::table('categoria')->paginate(7);
-            return response()->json($categoria);
+			$buscar=$request->nombre;
+            $criterio=$request->criterio;
+			if($buscar=='')
+       {
+        $categorias = Categoria::orderBy('idcategoria','desc')->paginate(7);
+       }
+       else
+       {
+        $categorias = Categoria::where($criterio,'like','%'.$buscar.'%')->orderBy('idcategoria','desc')->paginate(7);
+       }
+            
+            return response()->json($categorias);
 
         }
 
@@ -53,5 +63,34 @@ class CategoriaController extends Controller
 
 
     }
+	
+	public function disabled(Request $request,$id)
+    {
+      
+            $categoria=Categoria::findOrFail($id);
+            $categoria->estado='0';
+            $categoria->save();
 
-}
+          return response()->json('success',200);
+
+
+
+        }
+		
+		public function enabled(Request $request,$id)
+    {
+      
+            $categoria=Categoria::findOrFail($id);
+            $categoria->estado='1';
+            $categoria->save();
+
+          return response()->json('success',200);
+
+
+
+        }
+
+
+    }
+
+
