@@ -20,11 +20,23 @@ Route::get('categorias', 'Api\Auth\CategoriaController@index');
 Route::get('category_id/{id}', 'Api\Auth\CategoriaController@edit');
 
 
-Route::middleware('auth:api')->group(function () {
 
+
+
+Route::middleware('auth:api')->group(function () {
+	//categorias
     Route::put('update_category/{id}', 'Api\Auth\CategoriaController@update');
 	Route::put('desactivar/{id}', 'Api\Auth\CategoriaController@disabled');
 	Route::put('activar/{id}', 'Api\Auth\CategoriaController@enabled');
+	Route::post('crear', 'Api\Auth\CategoriaController@create');
+
+	//ventas
+	Route::get('ventas', 'Api\Auth\VentaController@index');
+	Route::get('consultarcc/{id}', 'Api\Auth\VentaController@consultacedula');
+	Route::get('tipoventa', 'Api\Auth\VentaController@tipoventa');
+	Route::get('product_cod/{id}', 'Api\Auth\VentaController@getproductocod');
+	
+	
 	
 	});
 

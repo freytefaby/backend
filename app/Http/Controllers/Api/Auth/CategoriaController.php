@@ -63,6 +63,34 @@ class CategoriaController extends Controller
 
 
     }
+
+    public function create(Request $request)
+    {
+        $validator=\Validator::make($request->all(),[
+            'nombre' => 'required|min:5',
+            'descripcion' => 'required|min:5',
+                  ]);
+
+        if($validator->fails())
+        {
+          return response()->json( $errors=$validator->errors()->all(),400 );
+        }
+        else
+        {
+            $categoria=new Categoria;
+            $categoria->descripcioncategoria=$request->nombre;
+            $categoria->descrip=$request->descripcion;
+            $categoria->estado='1';
+            $categoria->save();
+
+          return response()->json('success',200);
+
+
+
+        }
+
+
+    }
 	
 	public function disabled(Request $request,$id)
     {
