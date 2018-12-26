@@ -35,6 +35,7 @@ Route::middleware('auth:api')->group(function () {
 	Route::get('consultarcc/{id}', 'Api\Auth\VentaController@consultacedula');
 	Route::get('tipoventa', 'Api\Auth\VentaController@tipoventa');
 	Route::get('product_cod/{id}', 'Api\Auth\VentaController@getproductocod');
+	Route::post('crearventa', 'Api\Auth\VentaController@create');
 	
 	
 	

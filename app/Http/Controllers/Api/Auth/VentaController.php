@@ -59,6 +59,7 @@ class VentaController extends Controller
             {
             $consulta=DB::table('producto as p')
             ->join('proveedor as pr','pr.idproveedor','p.idproveedor')
+            ->join('iva as i','i.idiva','p.idiva')
             ->where('codigobarra1',$id)->first();
             if($consulta)
             {
@@ -70,7 +71,15 @@ class VentaController extends Controller
 
                } 
              
-            }            
+            }    
+            
+            public function create(Request $request)
+            {
+           
+               $detalles = $request->data;
+               return response()->json(["detalles"=>$detalles,"data"=>"respuesta del servidor"]);
+
+            }      
 
     
 
