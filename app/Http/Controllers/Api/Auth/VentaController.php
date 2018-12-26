@@ -60,7 +60,16 @@ class VentaController extends Controller
             $consulta=DB::table('producto as p')
             ->join('proveedor as pr','pr.idproveedor','p.idproveedor')
             ->where('codigobarra1',$id)->first();
-             return response()->json($consulta);
+            if($consulta)
+            {
+                return response()->json($consulta);
+            }
+            else
+               {
+                return response()->json('1',400);
+
+               } 
+             
             }            
 
     
