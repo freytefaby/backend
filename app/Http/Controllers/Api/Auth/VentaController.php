@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Venta;
+use App\DetalleVenta;
+use Carbon\Carbon;
 
 class VentaController extends Controller
 {
@@ -75,10 +77,55 @@ class VentaController extends Controller
             
             public function create(Request $request)
             {
-           
-               $detalles = $request->data;
-               return response()->json(["detalles"=>$detalles,"data"=>"respuesta del servidor"]);
-
+                try{
+                    DB::beginTransaction();
+                    $venta=new Venta();
+                    $venta->valorventa=$request->total;
+                    $venta->idusuario=Auth::user()->id;
+                    $venta->idcliente=$request->cliente;
+                    $venta->subtotal=$request->subtotal;
+                    $venta->comisionventa=$request->comisiones;
+                    $venta->utilidades=$request->utilidades;
+                    $mytime=Carbon::now('America/Bogota');
+                    $venta->fecha=$mytime->toDateTimeString();
+                    $venta->importeventa=$request->importe;
+                    $venta->estado='1';
+                    $venta->idtipoventa=$request->tipo;
+                    $venta->descuento=$request->descuento;
+                    $venta->comision='0';
+                    $venta->devolucion='0';
+                    $venta->comision_devolucion='0';
+                    $venta->utilidades_devolucion='0';
+                    $venta->convenio='0';
+                    $venta->save();
+        
+                    $detalles=$request->data;
+        
+                    foreach($detalles as $ep=>$det)
+                    {
+        
+        
+                        $detalle = new DetalleVenta();
+                        //$detalle->idcompra=$compra->idcompra;
+                        $detalle->valor=$det['venta'];
+                        $detalle->idproducto=$det['id'];
+                        $detalle->cantidad=$det['cantidad'];
+                        $detalle->subtotal=$det['subtotal'];
+                        $detalle->idventa=$venta->idventa;
+                        $detalle->utilidad=$det['utilidad'];
+                        $detalle->comision=$det['comision'];
+                        $detalle->save();
+        
+                       
+                    }
+                
+        
+                    DB::commit();
+        
+                } catch(Exception $e)
+                {
+                    DB::rollBack();
+                }
             }      
 
     
