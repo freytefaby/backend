@@ -77,55 +77,77 @@ class VentaController extends Controller
             
             public function create(Request $request)
             {
-                try{
-                    DB::beginTransaction();
-                    $venta=new Venta();
-                    $venta->valorventa=$request->total;
-                    $venta->idusuario=Auth::user()->id;
-                    $venta->idcliente=$request->cliente;
-                    $venta->subtotal=$request->subtotal;
-                    $venta->comisionventa=$request->comisiones;
-                    $venta->utilidades=$request->utilidades;
-                    $mytime=Carbon::now('America/Bogota');
-                    $venta->fecha=$mytime->toDateTimeString();
-                    $venta->importeventa=$request->importe;
-                    $venta->estado='1';
-                    $venta->idtipoventa=$request->tipo;
-                    $venta->descuento=$request->descuento;
-                    $venta->comision='0';
-                    $venta->devolucion='0';
-                    $venta->comision_devolucion='0';
-                    $venta->utilidades_devolucion='0';
-                    $venta->convenio='0';
-                    $venta->save();
+                $validator=\Validator::make($request->all(),[
+                    'data.*.cantidad'=>'required',
+                    'data.*.venta'=>'required',
+                    'data.*.utilidad'=>'required',
+                    'data.*.id'=>'required',
+                    'total' => 'required',
+                    'subtotal' => 'required',
+                    'comisiones' => 'required',
+                    'utilidades' => 'required',
+                    'importe' => 'required',
+                    'tipo'=>'required'
+                          ]);
         
-                    $detalles=$request->data;
-        
-                    foreach($detalles as $ep=>$det)
-                    {
-        
-        
-                        $detalle = new DetalleVenta();
-                        //$detalle->idcompra=$compra->idcompra;
-                        $detalle->valor=$det['venta'];
-                        $detalle->idproducto=$det['id'];
-                        $detalle->cantidad=$det['cantidad'];
-                        $detalle->subtotal=$det['subtotal'];
-                        $detalle->idventa=$venta->idventa;
-                        $detalle->utilidad=$det['utilidad'];
-                        $detalle->comision=$det['comision'];
-                        $detalle->save();
-        
-                       
-                    }
-                
-        
-                    DB::commit();
-        
-                } catch(Exception $e)
+                if($validator->fails())
                 {
-                    DB::rollBack();
+                  return response()->json( $errors=$validator->errors()->all(),400 );
                 }
+                else
+                {
+                    try{
+                        DB::beginTransaction();
+                        $venta=new Venta();
+                        $venta->valorventa=$request->total;
+                        $venta->idusuario=Auth::user()->id;
+                        $venta->idcliente=$request->cliente;
+                        $venta->subtotal=$request->subtotal;
+                        $venta->comisionventa=$request->comisiones;
+                        $venta->utilidades=$request->utilidades;
+                        $mytime=Carbon::now('America/Bogota');
+                        $venta->fecha=$mytime->toDateTimeString();
+                        $venta->importeventa=$request->importe;
+                        $venta->estado='1';
+                        $venta->idtipoventa=$request->tipo;
+                        $venta->descuento=$request->descuento;
+                        $venta->comision='0';
+                        $venta->devolucion='0';
+                        $venta->comision_devolucion='0';
+                        $venta->utilidades_devolucion='0';
+                        $venta->convenio='0';
+                        $venta->save();
+            
+                        $detalles=$request->data;
+            
+                        foreach($detalles as $ep=>$det)
+                        {
+            
+            
+                            $detalle = new DetalleVenta();
+                            $detalle->valor=$det['venta'];
+                            $detalle->idproducto=$det['id'];
+                            $detalle->cantidad=$det['cantidad'];
+                            $detalle->subtotal=$det['subtotal'];
+                            $detalle->idventa=$venta->idventa;
+                            $detalle->utilidad=$det['utilidad'];
+                            $detalle->comision=$det['comision'];
+                            $detalle->save();
+            
+                           
+                        }
+                    
+            
+                        DB::commit();
+                        return response()->json(["respuesta"=>"ok","factura"=>$venta->idventa,200]);
+                    } catch(Exception $e)
+                    {
+                        DB::rollBack();
+                        return response()->json($e,400);
+                    }
+                }
+
+                
             }      
 
     
