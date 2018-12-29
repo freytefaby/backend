@@ -198,13 +198,26 @@ class VentaController extends Controller
     {
         $criterio=$request->criterio;
         $buscar=$request->buscar;
+            
+        if($criterio=='')
+        {
+            return response()->json(["error"=>"error de calculo"],400);
+        }
+        else
+        {
+          
+           
+           $producto=DB::table('producto as p')
+           ->join('proveedor as pr','pr.idproveedor','p.idproveedor')
+           ->join('categoria as c','c.idcategoria','p.idcategoria')
+           ->where($criterio,'like','%'.$buscar.'%')
+           ->take(10)->get();
+           return response()->json(["data"=>$producto,200]);
+        }
 
+       
 
-        $producto=DB::table('producto as p')->where($criterio,'like','%'.$buscar.'%')
-        ->join('proveedor as pr','pr.idproveedor','p.idproveedor')
-        ->take(10)->get();
-
-        return response()->json(["data"=>$producto,200]);
+       
 
 
     }
