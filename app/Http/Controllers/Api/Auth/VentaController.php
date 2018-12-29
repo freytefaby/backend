@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Venta;
 use App\DetalleVenta;
+use App\Cliente;
 use Carbon\Carbon;
 
 class VentaController extends Controller
@@ -148,9 +149,65 @@ class VentaController extends Controller
                 }
 
                 
-            }      
+            }  
+            
+    public function getclient(Request $request)
 
-    
+    {
+        $criterio=$request->criterio;
+        $buscar=$request->buscar;
+
+        $cliente=DB::table('clientes as c')->where($criterio,'like','%'.$buscar.'%')->take(10)->get();
+
+                       return response()->json(["data"=>$cliente,200]);
+
+    }
+
+    public function postclient(Request $request)
+    {
+        
+        $validator=\Validator::make($request->all(),[
+            'nombre' => 'required',
+            'apellido' => 'required',
+            'telefono' => 'required',
+            'cedula'=>'required|unique:clientes,cedulacliente',
+           
+                  ]);
+
+        if($validator->fails())
+        {
+          return response()->json( $errors=$validator->errors()->all(),400 );
+        }
+        else
+        {
+            $cliente = new Cliente();
+            $cliente->nombrecliente=$request->nombre;
+            $cliente->apellidocliente=$request->apellido;
+            $cliente->direccioncliente=$request->direccion;
+            $cliente->telefonocliente=$request->telefono;
+            $cliente->cedulacliente=$request->cedula;
+            $cliente->correocliente=$request->correo;
+            $cliente->save();
+
+            return response()->json(["respuesta"=>"ok","idcliente"=>$request->cedula]);
+        }
+        
+    }
+
+    public function getproducto(Request $request)
+    {
+        $criterio=$request->criterio;
+        $buscar=$request->buscar;
+
+
+        $producto=DB::table('producto as p')->where($criterio,'like','%'.$buscar.'%')
+        ->join('proveedor as pr','pr.idproveedor','p.idproveedor')
+        ->take(10)->get();
+
+        return response()->json(["data"=>$producto,200]);
+
+
+    }
 
     }
 

@@ -22,7 +22,6 @@ Route::get('category_id/{id}', 'Api\Auth\CategoriaController@edit');
 
 
 
-
 Route::middleware('auth:api')->group(function () {
 	//categorias
     Route::put('update_category/{id}', 'Api\Auth\CategoriaController@update');
@@ -36,6 +35,11 @@ Route::middleware('auth:api')->group(function () {
 	Route::get('tipoventa', 'Api\Auth\VentaController@tipoventa');
 	Route::get('product_cod/{id}', 'Api\Auth\VentaController@getproductocod');
 	Route::post('crearventa', 'Api\Auth\VentaController@create');
+	Route::get('buscarcliente', 'Api\Auth\VentaController@getclient');
+	Route::post('crearcliente', 'Api\Auth\VentaController@postclient');
+	Route::get('buscarproducto', 'Api\Auth\VentaController@getproducto');
+
+	
 	
 	
 	
