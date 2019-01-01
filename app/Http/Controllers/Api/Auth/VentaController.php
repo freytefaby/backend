@@ -40,7 +40,7 @@ class VentaController extends Controller
         }
 
     public function consultacedula(Request $request, $id)
-    {
+       {
             $consulta=DB::table('clientes')->where('cedulacliente',$id)->first();
             if($consulta)
             return response()->json($consulta,200);
@@ -50,9 +50,9 @@ class VentaController extends Controller
             }
 
 
-    }
+      }
     public function tipoventa(Request $request)
-    {
+      {
             $consulta=DB::table('tipoventa')->get();
             return response()->json($consulta);
             }
@@ -75,9 +75,10 @@ class VentaController extends Controller
                } 
              
             }    
-            
-            public function create(Request $request)
-            {
+    public function create(Request $request)
+              {
+
+               
                 $validator=\Validator::make($request->all(),[
                     'data.*.cantidad'=>'required',
                     'data.*.venta'=>'required',
@@ -97,7 +98,16 @@ class VentaController extends Controller
                 }
                 else
                 {
-                    try{
+                    $detalles=$request->data;
+                    $data=$this->validarventa($detalles,$request->subtotal);
+                        if($data==1)
+                        {
+                            return response()->json("Los productos no fueron calculados correctamente por favor vuelva a iniciar la venta",400);
+
+                        }
+                        else
+                        {
+                                 try{
                         DB::beginTransaction();
                         $venta=new Venta();
                         $venta->valorventa=$request->total;
@@ -119,7 +129,7 @@ class VentaController extends Controller
                         $venta->convenio='0';
                         $venta->save();
             
-                        $detalles=$request->data;
+                       
             
                         foreach($detalles as $ep=>$det)
                         {
@@ -140,12 +150,17 @@ class VentaController extends Controller
                     
             
                         DB::commit();
-                        return response()->json(["respuesta"=>"ok","factura"=>$venta->idventa,200]);
+                        return response()->json(["respuesta"=>"ok","factura"=>$venta->idventa,"otros"=>$data,200]);
                     } catch(Exception $e)
                     {
                         DB::rollBack();
                         return response()->json($e,400);
                     }
+
+                        }
+
+                
+                   
                 }
 
                 
@@ -153,7 +168,7 @@ class VentaController extends Controller
             
     public function getclient(Request $request)
 
-    {
+       {
         $criterio=$request->criterio;
         $buscar=$request->buscar;
 
@@ -161,10 +176,10 @@ class VentaController extends Controller
 
                        return response()->json(["data"=>$cliente,200]);
 
-    }
+       }
 
     public function postclient(Request $request)
-    {
+      {
         
         $validator=\Validator::make($request->all(),[
             'nombre' => 'required',
@@ -192,10 +207,10 @@ class VentaController extends Controller
             return response()->json(["respuesta"=>"ok","idcliente"=>$request->cedula]);
         }
         
-    }
+      }
 
     public function getproducto(Request $request)
-    {
+      {
         $criterio=$request->criterio;
         $buscar=$request->buscar;
             
@@ -220,7 +235,7 @@ class VentaController extends Controller
        
 
 
-    }
+      }
 
     }
 
