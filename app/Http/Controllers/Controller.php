@@ -15,19 +15,20 @@ class Controller extends BaseController
 
   public function validarventa($array,$subtotal)
   {
-        $sw=0;
         $vent=0;
+        $data=array();
     foreach($array as $ep=>$det)
     {
         
         $consulta=DB::table('producto')->where('idproducto',$det['id'])->first();
         $oper=$consulta->preciosugerido*$det['cantidad']/$consulta->cantidadempaque;
         $vent=$vent+$oper;
-        if($det['subtotal']<>$oper || $vent <> $subtotal)
+        if($det['subtotal']!=$oper || $det['cantidad'] > $consulta->stock)
         {
-            $sw=1;
+            array_push($data,["producto"=>$consulta->descripcionproducto,"stock"=>$consulta->stock]);
         }
+      
     }
-    return $sw;
+    return $data;
   }
 }

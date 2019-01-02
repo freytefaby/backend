@@ -101,9 +101,9 @@ class VentaController extends Controller
                     $detalles=$request->data;
                     $data=$this->validarventa($detalles,$request->subtotal);
         
-                        if($data==1)
+                        if(sizeof($data)>0)
                         {
-                            return response()->json("Los productos no fueron calculados correctamente por favor vuelva a iniciar la venta",400);
+                            return response()->json(["error"=>"Los productos no fueron calculados correctamente por favor vuelva a iniciar la venta","producto"=>$data],409);
 
                         }
                         else
@@ -151,14 +151,14 @@ class VentaController extends Controller
                     
             
                         DB::commit();
-                        return response()->json(["respuesta"=>"ok","factura"=>$venta->idventa,"otros"=>$data,200]);
+                        return response()->json(["respuesta"=>"ok","factura"=>$venta->idventa]);
                     } catch(Exception $e)
                     {
                         DB::rollBack();
                         return response()->json($e,400);
                     }
 
-                        }
+                       }
 
                 
                    
