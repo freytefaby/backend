@@ -17,9 +17,9 @@ class Controller extends BaseController
   {
         $sw=0;
         $vent=0;
-        $array[0]['subtotal']==90000;
     foreach($array as $ep=>$det)
     {
+        
         $consulta=DB::table('producto')->where('idproducto',$det['id'])->first();
         $oper=$consulta->preciosugerido*$det['cantidad']/$consulta->cantidadempaque;
         $vent=$vent+$oper;

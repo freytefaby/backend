@@ -100,6 +100,7 @@ class VentaController extends Controller
                 {
                     $detalles=$request->data;
                     $data=$this->validarventa($detalles,$request->subtotal);
+        
                         if($data==1)
                         {
                             return response()->json("Los productos no fueron calculados correctamente por favor vuelva a iniciar la venta",400);
