@@ -19,6 +19,8 @@ Route::post('login', 'Api\Auth\LoginController@login');
 Route::get('categorias', 'Api\Auth\CategoriaController@index');
 Route::get('category_id/{id}', 'Api\Auth\CategoriaController@edit');
 
+//reportes
+Route::get('pdf_ventas/{id}', 'Api\Auth\PdfController@ventas');
 
 
 
@@ -39,6 +41,8 @@ Route::middleware('auth:api')->group(function () {
 	Route::post('crearcliente', 'Api\Auth\VentaController@postclient');
 	Route::get('buscarproducto', 'Api\Auth\VentaController@getproducto');
 	Route::get('ventashow/{id}', 'Api\Auth\VentaController@show');
+
+	//reportes pdf
 
 	
 	

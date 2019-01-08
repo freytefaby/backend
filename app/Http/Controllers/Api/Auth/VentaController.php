@@ -27,7 +27,7 @@ class VentaController extends Controller
             else
                 {
                     $buscar=$request->nombre;
-            $criterio=$request->criterio;
+                    $criterio=$request->criterio;
 			if($buscar=='')
                 {
                     $ventas=DB::table('venta as v')
@@ -69,8 +69,17 @@ class VentaController extends Controller
        }
     public function tipoventa(Request $request)
       {
-            $consulta=DB::table('tipoventa')->get();
-            return response()->json($consulta);
+        $data=$this->PermisoVenta("1","crear");
+            if($data)
+                {
+                    return response()->json(["error"=>1],400);
+                }
+            else
+                {
+                    $consulta=DB::table('tipoventa')->get();
+                    return response()->json($consulta);
+                }
+           
       }
 
 
@@ -93,93 +102,101 @@ class VentaController extends Controller
         }    
     public function create(Request $request)
         {
-
-               
-                $validator=\Validator::make($request->all(),[
-                    'data.*.cantidad'=>'required',
-                    'data.*.venta'=>'required',
-                    'data.*.utilidad'=>'required',
-                    'data.*.id'=>'required',
-                    'total' => 'required',
-                    'subtotal' => 'required',
-                    'comisiones' => 'required',
-                    'utilidades' => 'required',
-                    'importe' => 'required',
-                    'tipo'=>'required'
-                          ]);
-        
-                if($validator->fails())
-                {
-                  return response()->json( $errors=$validator->errors()->all(),400 );
-                }
+            $data=$this->PermisoVenta("1","crear");
+               if($data)
+                    {
+                        return response()->json(["error"=>1],400);
+                    }
                 else
-                {
-                    $detalles=$request->data;
-                    $data=$this->validarventa($detalles,$request->subtotal);
-        
-                        if(sizeof($data)>0)
+                    {
+                        $validator=\Validator::make($request->all(),[
+                            'data.*.cantidad'=>'required',
+                            'data.*.venta'=>'required',
+                            'data.*.utilidad'=>'required',
+                            'data.*.id'=>'required',
+                            'total' => 'required',
+                            'subtotal' => 'required',
+                            'comisiones' => 'required',
+                            'utilidades' => 'required',
+                            'importe' => 'required',
+                            'tipo'=>'required'
+                                  ]);
+                
+                        if($validator->fails())
                         {
-                            return response()->json(["error"=>"Los productos no fueron calculados correctamente por favor vuelva a iniciar la venta","producto"=>$data],409);
-
+                          return response()->json( $errors=$validator->errors()->all(),400 );
                         }
                         else
                         {
-                                 try{
-                        DB::beginTransaction();
-                        $venta=new Venta();
-                        $venta->valorventa=$request->total;
-                        $venta->idusuario=Auth::user()->id;
-                        $venta->idcliente=$request->cliente;
-                        $venta->subtotal=$request->subtotal;
-                        $venta->comisionventa=$request->comisiones;
-                        $venta->utilidades=$request->utilidades;
-                        $mytime=Carbon::now('America/Bogota');
-                        $venta->fecha=$mytime->toDateTimeString();
-                        $venta->importeventa=$request->importe;
-                        $venta->estado='1';
-                        $venta->idtipoventa=$request->tipo;
-                        $venta->descuento=$request->descuento;
-                        $venta->comision='0';
-                        $venta->devolucion='0';
-                        $venta->comision_devolucion='0';
-                        $venta->utilidades_devolucion='0';
-                        $venta->convenio='0';
-                        $venta->save();
-            
-                       
-            
-                        foreach($detalles as $ep=>$det)
-                        {
-            
-            
-                            $detalle = new DetalleVenta();
-                            $detalle->valor=$det['venta'];
-                            $detalle->idproducto=$det['id'];
-                            $detalle->cantidad=$det['cantidad'];
-                            $detalle->subtotal=$det['subtotal'];
-                            $detalle->idventa=$venta->idventa;
-                            $detalle->utilidad=$det['utilidad'];
-                            $detalle->comision=$det['comision'];
-                            $detalle->save();
-            
+                            $detalles=$request->data;
+                            $data=$this->validarventa($detalles,$request->subtotal);
+                
+                                if(sizeof($data)>0)
+                                {
+                                    return response()->json(["error"=>"Los productos no fueron calculados correctamente por favor vuelva a iniciar la venta","producto"=>$data],409);
+        
+                                }
+                                else
+                                {
+                                         try{
+                                DB::beginTransaction();
+                                $venta=new Venta();
+                                $venta->valorventa=$request->total;
+                                $venta->idusuario=Auth::user()->id;
+                                $venta->idcliente=$request->cliente;
+                                $venta->subtotal=$request->subtotal;
+                                $venta->comisionventa=$request->comisiones;
+                                $venta->utilidades=$request->utilidades;
+                                $mytime=Carbon::now('America/Bogota');
+                                $venta->fecha=$mytime->toDateTimeString();
+                                $venta->importeventa=$request->importe;
+                                $venta->estado='1';
+                                $venta->idtipoventa=$request->tipo;
+                                $venta->descuento=$request->descuento;
+                                $venta->comision='0';
+                                $venta->devolucion='0';
+                                $venta->comision_devolucion='0';
+                                $venta->utilidades_devolucion='0';
+                                $venta->convenio='0';
+                                $venta->save();
+                    
+                               
+                    
+                                foreach($detalles as $ep=>$det)
+                                {
+                    
+                    
+                                    $detalle = new DetalleVenta();
+                                    $detalle->valor=$det['venta'];
+                                    $detalle->idproducto=$det['id'];
+                                    $detalle->cantidad=$det['cantidad'];
+                                    $detalle->subtotal=$det['subtotal'];
+                                    $detalle->idventa=$venta->idventa;
+                                    $detalle->utilidad=$det['utilidad'];
+                                    $detalle->comision=$det['comision'];
+                                    $detalle->save();
+                    
+                                   
+                                }
+                            
+                    
+                                DB::commit();
+                                return response()->json(["respuesta"=>"ok","factura"=>$venta->idventa]);
+                            } catch(Exception $e)
+                            {
+                                DB::rollBack();
+                                return response()->json($e,400);
+                            }
+        
+                               }
+        
+                        
                            
                         }
-                    
-            
-                        DB::commit();
-                        return response()->json(["respuesta"=>"ok","factura"=>$venta->idventa]);
-                    } catch(Exception $e)
-                    {
-                        DB::rollBack();
-                        return response()->json($e,400);
+        
+
                     }
-
-                       }
-
-                
-                   
-                }
-
+              
                 
         }  
             
@@ -197,32 +214,41 @@ class VentaController extends Controller
 
     public function postclient(Request $request)
       {
-        
-                $validator=\Validator::make($request->all(),[
-                    'nombre' => 'required',
-                    'apellido' => 'required',
-                    'telefono' => 'required',
-                    'cedula'=>'required|unique:clientes,cedulacliente',
-                
-                        ]);
 
-                if($validator->fails())
-                {
-                return response()->json( $errors=$validator->errors()->all(),400 );
-                }
+                $data=$this->PermisoVenta("5","crear");
+                if($data)
+                    {
+                       return response()->json(["error"=>1],400);
+                    }
                 else
-                {
-                    $cliente = new Cliente();
-                    $cliente->nombrecliente=$request->nombre;
-                    $cliente->apellidocliente=$request->apellido;
-                    $cliente->direccioncliente=$request->direccion;
-                    $cliente->telefonocliente=$request->telefono;
-                    $cliente->cedulacliente=$request->cedula;
-                    $cliente->correocliente=$request->correo;
-                    $cliente->save();
-
-                    return response()->json(["respuesta"=>"ok","idcliente"=>$request->cedula]);
-                }
+                    {
+                        $validator=\Validator::make($request->all(),[
+                            'nombre' => 'required',
+                            'apellido' => 'required',
+                            'telefono' => 'required',
+                            'cedula'=>'required|unique:clientes,cedulacliente',
+                        
+                                ]);
+        
+                        if($validator->fails())
+                        {
+                        return response()->json( $errors=$validator->errors()->all(),400 );
+                        }
+                        else
+                        {
+                            $cliente = new Cliente();
+                            $cliente->nombrecliente=$request->nombre;
+                            $cliente->apellidocliente=$request->apellido;
+                            $cliente->direccioncliente=$request->direccion;
+                            $cliente->telefonocliente=$request->telefono;
+                            $cliente->cedulacliente=$request->cedula;
+                            $cliente->correocliente=$request->correo;
+                            $cliente->save();
+        
+                            return response()->json(["respuesta"=>"ok","idcliente"=>$request->cedula]);
+                        }
+                    }
+                
         
       }
 
@@ -256,28 +282,39 @@ class VentaController extends Controller
 
     public function show(Request $request, $id)
         {
-            $show=DB::table('venta as v')
-            ->join('clientes as c','v.idcliente','c.idcliente')
-            ->join('users as u','u.id','v.idusuario')
-            ->join('tipoventa as t','t.idtipoventa','v.idtipoventa')
-            ->where('v.idusuario',Auth::id())
-            ->where('v.idventa',$id)
-            ->orderby('v.idventa','desc')
-            ->first();
-            $detail=DB::table('detalleventa as d')
-                    ->join('producto as p','p.idproducto','d.idproducto')
-                    ->join('iva as i','i.idiva','p.idiva')
-                    ->where('d.idventa',$id)
-                    ->get();
+            $data=$this->PermisoVenta("1","leer");
 
-            if($show)
-                {
-                    return response()->json(["datos"=>$show,"detalle"=>$detail],200);
-                }
+            if($data)
+            {
+                return response()->json(["error"=>1],400);
+            }
             else
-                {
-                    return response()->json(["error"=>1],400);
-                }
+            {
+ 
+                $show=DB::table('venta as v')
+                ->join('clientes as c','v.idcliente','c.idcliente')
+                ->join('users as u','u.id','v.idusuario')
+                ->join('tipoventa as t','t.idtipoventa','v.idtipoventa')
+                ->where('v.idusuario',Auth::id())
+                ->where('v.idventa',$id)
+                ->orderby('v.idventa','desc')
+                ->first();
+                $detail=DB::table('detalleventa as d')
+                        ->join('producto as p','p.idproducto','d.idproducto')
+                        ->join('iva as i','i.idiva','p.idiva')
+                        ->where('d.idventa',$id)
+                        ->get();
+    
+                if($show)
+                    {
+                        return response()->json(["datos"=>$show,"detalle"=>$detail],200);
+                    }
+                else
+                    {
+                        return response()->json(["error"=>1],400);
+                    }
+            }
+           
 
         }
 
