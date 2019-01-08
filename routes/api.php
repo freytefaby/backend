@@ -38,6 +38,7 @@ Route::middleware('auth:api')->group(function () {
 	Route::get('buscarcliente', 'Api\Auth\VentaController@getclient');
 	Route::post('crearcliente', 'Api\Auth\VentaController@postclient');
 	Route::get('buscarproducto', 'Api\Auth\VentaController@getproducto');
+	Route::get('ventashow/{id}', 'Api\Auth\VentaController@show');
 
 	
 	

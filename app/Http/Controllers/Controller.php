@@ -8,6 +8,8 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+
 
 class Controller extends BaseController
 {
@@ -30,5 +32,28 @@ class Controller extends BaseController
       
     }
     return $data;
+  }
+
+  public function PermisoVenta($recurso,$access)
+  {
+    $aux=true;
+    $user=DB::table('users as u')->where('id',Auth::id())->first();
+
+    $permiso=DB::table('permiso as p')
+    ->where('p.idrol','=',$user->idrol)
+    ->where('p.idrecurso','=',$recurso)
+    ->first();
+
+    if($permiso)
+      {
+        if($permiso->$access==1)
+        {
+            $aux=false;
+        }
+      }
+    
+
+
+      return $aux;
   }
 }

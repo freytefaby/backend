@@ -18,24 +18,40 @@ class VentaController extends Controller
 
     public function index(Request $request)
         {
-			$buscar=$request->nombre;
+            $data=$this->PermisoVenta("1","leer");
+
+            if($data)
+            {
+                return response()->json(["error"=>1],400);
+            }
+            else
+                {
+                    $buscar=$request->nombre;
             $criterio=$request->criterio;
 			if($buscar=='')
-       {
-          $ventas=DB::table('venta as v')
-          ->join('clientes as c','v.idcliente','c.idcliente')
-          ->join('users as u','u.id','v.idusuario')
-          ->join('tipoventa as t','t.idtipoventa','v.idtipoventa')
-          ->where('idusuario',Auth::id())
-          ->orderby('idventa','desc')
-          ->paginate(7);
-       }
-       else
-       {
-        $ventas = Venta::where($criterio,'like','%'.$buscar.'%')->orderBy('idcategoria','desc')->paginate(7);
-       }
+                {
+                    $ventas=DB::table('venta as v')
+                    ->join('clientes as c','v.idcliente','c.idcliente')
+                    ->join('users as u','u.id','v.idusuario')
+                    ->join('tipoventa as t','t.idtipoventa','v.idtipoventa')
+                    ->where('v.idusuario',Auth::id())
+                    ->orderby('v.idventa','desc')
+                    ->paginate(7);
+                }
+            else
+                        {
+                            $ventas=DB::table('venta as v') 
+                                    ->join('clientes as c','v.idcliente','c.idcliente')
+                                    ->join('users as u','u.id','v.idusuario')
+                                    ->join('tipoventa as t','t.idtipoventa','v.idtipoventa')
+                                    ->where('v.idusuario',Auth::id())
+                                    ->where($criterio,'like','%'.$buscar.'%')
+                                    ->orderby('v.idventa','desc')->paginate(7);
+                        }
             
-            return response()->json($ventas);
+                   return response()->json($ventas);
+                }
+			
 
         }
 
@@ -50,16 +66,16 @@ class VentaController extends Controller
             }
 
 
-      }
+       }
     public function tipoventa(Request $request)
       {
             $consulta=DB::table('tipoventa')->get();
             return response()->json($consulta);
-            }
+      }
 
 
     public function getproductocod(Request $request,$id)
-            {
+        {
             $consulta=DB::table('producto as p')
             ->join('proveedor as pr','pr.idproveedor','p.idproveedor')
             ->join('iva as i','i.idiva','p.idiva')
@@ -74,9 +90,9 @@ class VentaController extends Controller
 
                } 
              
-            }    
+        }    
     public function create(Request $request)
-              {
+        {
 
                
                 $validator=\Validator::make($request->all(),[
@@ -165,7 +181,7 @@ class VentaController extends Controller
                 }
 
                 
-            }  
+        }  
             
     public function getclient(Request $request)
 
@@ -182,54 +198,54 @@ class VentaController extends Controller
     public function postclient(Request $request)
       {
         
-        $validator=\Validator::make($request->all(),[
-            'nombre' => 'required',
-            'apellido' => 'required',
-            'telefono' => 'required',
-            'cedula'=>'required|unique:clientes,cedulacliente',
-           
-                  ]);
+                $validator=\Validator::make($request->all(),[
+                    'nombre' => 'required',
+                    'apellido' => 'required',
+                    'telefono' => 'required',
+                    'cedula'=>'required|unique:clientes,cedulacliente',
+                
+                        ]);
 
-        if($validator->fails())
-        {
-          return response()->json( $errors=$validator->errors()->all(),400 );
-        }
-        else
-        {
-            $cliente = new Cliente();
-            $cliente->nombrecliente=$request->nombre;
-            $cliente->apellidocliente=$request->apellido;
-            $cliente->direccioncliente=$request->direccion;
-            $cliente->telefonocliente=$request->telefono;
-            $cliente->cedulacliente=$request->cedula;
-            $cliente->correocliente=$request->correo;
-            $cliente->save();
+                if($validator->fails())
+                {
+                return response()->json( $errors=$validator->errors()->all(),400 );
+                }
+                else
+                {
+                    $cliente = new Cliente();
+                    $cliente->nombrecliente=$request->nombre;
+                    $cliente->apellidocliente=$request->apellido;
+                    $cliente->direccioncliente=$request->direccion;
+                    $cliente->telefonocliente=$request->telefono;
+                    $cliente->cedulacliente=$request->cedula;
+                    $cliente->correocliente=$request->correo;
+                    $cliente->save();
 
-            return response()->json(["respuesta"=>"ok","idcliente"=>$request->cedula]);
-        }
+                    return response()->json(["respuesta"=>"ok","idcliente"=>$request->cedula]);
+                }
         
       }
 
     public function getproducto(Request $request)
       {
-        $criterio=$request->criterio;
-        $buscar=$request->buscar;
+            $criterio=$request->criterio;
+            $buscar=$request->buscar;
+                
+            if($criterio=='')
+            {
+                return response()->json(["error"=>"error de calculo"],400);
+            }
+            else
+            {
             
-        if($criterio=='')
-        {
-            return response()->json(["error"=>"error de calculo"],400);
-        }
-        else
-        {
-          
-           
-           $producto=DB::table('producto as p')
-           ->join('proveedor as pr','pr.idproveedor','p.idproveedor')
-           ->join('categoria as c','c.idcategoria','p.idcategoria')
-           ->where($criterio,'like','%'.$buscar.'%')
-           ->take(10)->get();
-           return response()->json(["data"=>$producto,200]);
-        }
+            
+            $producto=DB::table('producto as p')
+            ->join('proveedor as pr','pr.idproveedor','p.idproveedor')
+            ->join('categoria as c','c.idcategoria','p.idcategoria')
+            ->where($criterio,'like','%'.$buscar.'%')
+            ->take(10)->get();
+            return response()->json(["data"=>$producto,200]);
+            }
 
        
 
@@ -237,6 +253,33 @@ class VentaController extends Controller
 
 
       }
+
+    public function show(Request $request, $id)
+        {
+            $show=DB::table('venta as v')
+            ->join('clientes as c','v.idcliente','c.idcliente')
+            ->join('users as u','u.id','v.idusuario')
+            ->join('tipoventa as t','t.idtipoventa','v.idtipoventa')
+            ->where('v.idusuario',Auth::id())
+            ->where('v.idventa',$id)
+            ->orderby('v.idventa','desc')
+            ->first();
+            $detail=DB::table('detalleventa as d')
+                    ->join('producto as p','p.idproducto','d.idproducto')
+                    ->join('iva as i','i.idiva','p.idiva')
+                    ->where('d.idventa',$id)
+                    ->get();
+
+            if($show)
+                {
+                    return response()->json(["datos"=>$show,"detalle"=>$detail],200);
+                }
+            else
+                {
+                    return response()->json(["error"=>1],400);
+                }
+
+        }
 
     }
 
