@@ -36,7 +36,7 @@ class PdfController extends Controller
                 {
                     $data = ['cabecera'=>$cabecera,'show'=>$show,'detail'=>$detail];
                     $pdf = PDF::loadView('peticion.pdf.factura', $data);
-                    return $pdf->stream('invoice');
+                    return $pdf->stream('Receipt');
 
                    // return view('peticion.pdf.factura',compact('detail','show'));
                 }

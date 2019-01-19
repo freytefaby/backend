@@ -3,7 +3,7 @@
 <!-- <html lang="ar"> for arabic only -->
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<link href='https://fonts.googleapis.com/css?family=Coda' rel='stylesheet' type='text/css'>
+	<!-- <link href='https://fonts.googleapis.com/css?family=Coda' rel='stylesheet' type='text/css'> -->
     <title>Express Wash Customer Invoice</title>
     <style>
 
@@ -290,15 +290,15 @@ margin-top:0;
 		@endforeach
 		</div>
 		<div class="parcial">
-			<p style="margin-top:10px; margin-bottom:4px; margin-right:5px">Parcial: $20.000 Cop</p>
+			<p style="margin-top:10px; margin-bottom:4px; margin-right:5px">Parcial: ${{number_format($show->subtotal)}} COP</p>
 		</div>
 		<p class="clean"></p>
 		<div class="impuesto">
-			<p style="margin-top:10px; margin-bottom:4px; margin-right:5px">Parcial: $20.000 Cop</p>
+			<p style="margin-top:10px; margin-bottom:4px; margin-right:5px">Impuesto: ${{number_format($show->valorventa-$show->subtotal)}} COP</p>
 		</div>
 		<p class="clean"></p>
 		<div class="neto">
-			<p style="margin-top:10px; margin-bottom:4px; margin-right:5px">Parcial: $20.000 Cop</p>
+			<p style="margin-top:10px; margin-bottom:4px; margin-right:5px">Total: ${{number_format($show->valorventa)}} COP</p>
 		</div>
 	</div>			
 	
