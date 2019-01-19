@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Categoria;
+use PDF;
 
 class PdfController extends Controller
 {
@@ -29,12 +30,12 @@ class PdfController extends Controller
                     ->join('iva as i','i.idiva','p.idiva')
                     ->where('d.idventa',$id)
                     ->get();
+            $cabecera=DB::table('infoempresa')->where('idinfoempresa','1')->first();
 
             if($show)
                 {
-                    $view =  \View::make('peticion.pdf.factura', compact('detail,show'))->render();
-                    $pdf = \App::make('dompdf.wrapper');
-                    $pdf->loadHTML($view);
+                    $data = ['cabecera'=>$cabecera,'show'=>$show,'detail'=>$detail];
+                    $pdf = PDF::loadView('peticion.pdf.factura', $data);
                     return $pdf->stream('invoice');
 
                    // return view('peticion.pdf.factura',compact('detail','show'));
